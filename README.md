@@ -16,8 +16,6 @@ fastest swimmer in every event" doesn't work — you have a 2-event cap per
 kid, so picking is a constrained assignment problem where one wrong swap
 costs you 5 points.
 
-A spreadsheet can get you 80% of the way there. Getting to the actual
-optimum requires solving the whole meet jointly, which is what this does.
 
 ## What it handles
 
