@@ -1,0 +1,3 @@
+{
+  "_README": "Map canonical (full) name -> list of alternate spellings to merge. Auto middle-initial stripping handles most cases; add entries here for typos, hyphenated names, married-name changes, or any edge case the auto-strip misses. Example: \"Jane Smith-Doe\": [\"Jane Doe\", \"Jane SmithDoe\"]"
+}

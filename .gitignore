@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+wheels/
+
+# OS / IDE
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Project data -- user-specific PDFs, kept out of git.
+# Only the handbook and a small sample stay tracked.
+data/raw/oh_2025/
+data/raw/vh_2025/
+data/raw/oh_vs_*.pdf
+data/raw/historic_meet_*.pdf
+data/synthetic/*.csv
+
+# Solver intermediate artifacts
+*.lp
+*.mps
+*.sol
+*.log
