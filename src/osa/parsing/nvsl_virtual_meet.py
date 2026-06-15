@@ -32,8 +32,8 @@ EVENT_RE = re.compile(
     rf"^(Boys|Girls)\s+(Free|Back|Breast|Fly|IM)\s+(\d+)M\s+{_AGE_OPTIONS}\s*$"
 )
 
-# Entry row e.g. "1. (5) 18.87 VW Robert H Flinn"  or
-#                "4. 22.45 VAC Alexander J Carroll"   (no points)
+# Entry row e.g. "1. (5) 18.87 XX John Q Doe"  or
+#                "4. 22.45 YY Jane K Roe"   (no points)
 # Name may be empty (wrapped to adjacent line).
 ENTRY_RE = re.compile(
     r"^\s*(\d+)\.\s+"

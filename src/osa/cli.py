@@ -9,7 +9,7 @@ Usage examples:
       --aliases data/aliases.json
 
   # Subtract specific swimmers who can't make the meet
-  osa vs ... --unavailable "Sydney Hergenroeder,Audrey Yiengst"
+  osa vs ... --unavailable "Jane Doe,John Doe"
   osa vs ... --unavailable-file friday_outs.txt
 
   # Self-consistent lineup with no opponent data

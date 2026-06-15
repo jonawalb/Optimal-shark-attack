@@ -63,25 +63,25 @@ BASELINE_TIMES: dict[tuple[Gender, AgeGroup, int, Stroke], tuple[float, float]] 
 }
 
 
-# A small name pool yields enough unique combinations for typical NVSL rosters.
+# Placeholder name pools for synthetic teams. All names are fictional; any
+# resemblance to real swimmers is coincidental.
 FIRST_NAMES_F = [
-    "Audrey", "Sydney", "Charlotte", "Ila", "Abby", "Rebecca", "Jessica", "Grace",
-    "Maddie", "Eleanor", "Vivian", "Caroline", "Amelia", "Sophia", "Olivia",
-    "Ava", "Mia", "Zoe", "Lily", "Ella", "Hannah", "Nora", "Hazel", "Stella",
-    "Penelope", "Violet", "Camila", "Aria", "Scarlett", "Layla", "Madison",
+    "Jane", "Janette", "Jessica", "Jenny", "Julia", "Joan", "Joy", "Jada",
+    "Jenna", "Jasmine", "Joanne", "Jamie", "Jocelyn", "Josephine", "Juliet",
+    "June", "Jewel", "Jolie", "Janet", "Jill", "Joelle", "Jordyn", "Jolene",
+    "Jeanette", "Jasper", "Jules", "Jacqueline", "Joi", "Janice", "Jerica",
 ]
 FIRST_NAMES_M = [
-    "Andrew", "Brady", "Isaac", "Luke", "Thomas", "Ethan", "Jonas", "Seth", "Jadon",
-    "Clark", "Mason", "Robert", "Nathan", "Joseph", "Cole", "William", "Owen",
-    "Jack", "Henry", "Liam", "Noah", "James", "Lucas", "Levi", "Mateo", "Logan",
-    "Daniel", "Caleb", "Wyatt", "Hudson", "Eli",
+    "John", "Jim", "Jack", "James", "Joe", "Joseph", "Jacob", "Jordan",
+    "Julian", "Jake", "Justin", "Jeff", "Jay", "Jared", "Jason", "Josh",
+    "Jeremy", "Julius", "Jerome", "Joel", "Jonah", "Jasper", "Jaden", "Jett",
+    "Jude", "Junior", "Javier", "Jefferson", "Jameson", "Joaquin",
 ]
 LAST_NAMES = [
-    "Bolz", "Dasher", "Ermarth", "Logan", "Daniels", "Yiengst", "Loeffert", "Yonas",
-    "Hetzel", "Rakip", "Bristol", "Hergenroeder", "Telfer", "Steahly", "Prunty",
-    "Mirilovich", "Carley", "Fournier", "Rivera", "Manion", "Slovensky", "Grieve",
-    "Hartley", "Whitman", "Lockhart", "Maddox", "Renner", "Castille", "Voss",
-    "Aldridge", "Bramley", "Conrad", "Drexler", "Fielding", "Halloran",
+    "Doe", "Roe", "Hayes", "Glass", "Reed", "Stone", "Nash", "Quinn", "Vance",
+    "Owens", "Klein", "Adler", "Becker", "Fischer", "Tanner", "Wells", "Hale",
+    "Pine", "Ash", "Ford", "Lane", "Knox", "Frost", "Holt", "Sage", "Wilde",
+    "Crane", "Briar", "Vale", "Marsh", "Quill", "Brink", "Vaughn", "Thorne",
 ]
 
 AGE_RANGES: dict[AgeGroup, tuple[int, int]] = {

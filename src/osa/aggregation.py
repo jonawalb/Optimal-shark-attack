@@ -9,7 +9,7 @@ When a swimmer has multiple recorded times in the same event (e.g. across
 
 The lineup optimizer uses A by default. We also re-run it on B and D and
 flag any event where the chosen swimmer would have differed -- this is the
-"Audrey regressed, swap to Sydney" trigger.
+"swimmer X regressed in stroke Y, swap teammate Z in" trigger.
 """
 from __future__ import annotations
 
@@ -37,10 +37,10 @@ def name_key(name: str, *, aliases: dict[str, str] | None = None) -> str:
       4. Optionally map via aliases dict (variant_key -> canonical_key)
 
     Examples:
-      'Sydney R Hergenroeder'  -> 'sydney hergenroeder'
-      'SYDNEY R HERGENROEDER'  -> 'sydney hergenroeder'
-      'Xander J Main'          -> 'xander main'
-      'Sam Smith Jr.'          -> 'sam smith'
+      'Jane R Doe'             -> 'jane doe'
+      'JANE R DOE'             -> 'jane doe'
+      'John J Doe'             -> 'john doe'
+      'Sam Doe Jr.'            -> 'sam doe'
     """
     tokens = name.lower().split()
     # strip single-letter middle initials (optionally with trailing period)
@@ -64,7 +64,7 @@ def load_alias_map(path: str | "Path | None") -> dict[str, str]:
 
     File format:
         {
-          "Sydney Hergenroeder": ["Sydney R Hergenroeder", "S Hergenroeder"],
+          "Jane Doe": ["Jane R Doe", "J Doe"],
           ...
         }
     Variants and canonicals are auto-normalized through the same pipeline.

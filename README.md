@@ -79,10 +79,10 @@ than A. Example:
 ```
 # 8  G_13-14_50_FREE                 WIN  9.0pts
     SWIMMER                       A (PR)  B (recent)   D (wtd)
-    Audrey Wilson                  30.40       31.22     31.08
-    Audrey Yiengst                 30.46       30.46     30.73
-    Sydney R Hergenroeder          30.67  (1 data point)
-    -> Note: Recent times suggest Camryn Smith in for Audrey Yiengst
+    Jane Doe                       30.40       31.22     31.08
+    Janette Doe                    30.46       30.46     30.73
+    Jessica R Doe                  30.67  (1 data point)
+    -> Note: Recent times suggest Joan Doe in for Janette Doe
 ```
 
 ## Race-day adjustments
@@ -90,7 +90,7 @@ than A. Example:
 If a swimmer can't make the meet:
 
 ```bash
-osa vs ... --unavailable "Sydney Hergenroeder,Audrey Yiengst"
+osa vs ... --unavailable "Jane Doe,John Doe"
 osa vs ... --unavailable-file friday_outs.txt
 ```
 
@@ -99,9 +99,9 @@ Re-runs the entire optimization with those swimmers removed.
 ## Identity matching
 
 NVSL meet PDFs are not consistent about how they spell names. The same kid
-will show up as `Sydney Hergenroeder` in one PDF and `SYDNEY R HERGENROEDER`
-in another. If you don't merge these, the optimizer thinks they're two
-different people and the 2-event cap stops working.
+will show up as `Jane Doe` in one PDF and `JANE R DOE` in another. If you
+don't merge these, the optimizer thinks they're two different people and the
+2-event cap stops working.
 
 The identity pre-flight runs first, before any optimization:
 
