@@ -48,6 +48,22 @@ ENTRY_RE = re.compile(
     r"([A-Z]{1,5})\s*$"               # team abbrev
 )
 
+# Single-column "ladder" variant: no per-row team abbrev; trailing date+meet name.
+# e.g. "1 21.24 S F Bella Dunn 8 6/13/2026 2026 OH Time Trials"
+ENTRY_RE_LADDER = re.compile(
+    r"^\s*(\d+)\*?\s+"                # rank
+    r"(x?)"                            # optional 'x'
+    r"(\d{0,2}:?\d{2}\.\d{2})\s+"     # time
+    r"[SLY]\s+[FPS]\s+"               # course + round
+    r"(.+?)\s+"                        # name
+    r"(\d{1,2})\s+"                   # age
+    r"(\d{1,2}/\d{1,2}/\d{2,4})\s+"   # date m/d/yyyy
+    r".+$"                             # meet name (discarded)
+)
+
+# Team-header line "Orange Hunt Sharks [OH]" or similar.
+TEAM_HEADER_RE = re.compile(r"\[([A-Z]{1,5})\]\s*$")
+
 # Lines we know to skip (page headers, banners)
 SKIP_PREFIXES = (
     "Licensed To:",
@@ -99,12 +115,27 @@ def _parse_event_header(line: str) -> tuple[str, str, int, str] | None:
     return gender, age_group, int(dist_word), STROKES[stroke_word]
 
 
-def _parse_entry(line: str, current_event: tuple[str, str, int, str]) -> Entry | None:
+def _parse_entry(line: str, current_event: tuple[str, str, int, str],
+                  default_team: str = "") -> Entry | None:
     """Parse one entry row using the regex; returns None if no match."""
     m = ENTRY_RE.match(line)
-    if not m:
-        return None
-    rank_s, x_flag, time_s, name, age_s, team = m.groups()
+    if m:
+        rank_s, x_flag, time_s, name, age_s, team = m.groups()
+        meet_date = ""
+    else:
+        m = ENTRY_RE_LADDER.match(line)
+        if not m:
+            return None
+        rank_s, x_flag, time_s, name, age_s, date_s = m.groups()
+        team = default_team
+        # convert m/d/yyyy -> yyyy-mm-dd
+        try:
+            mo, da, yr = date_s.split("/")
+            if len(yr) == 2:
+                yr = "20" + yr
+            meet_date = f"{int(yr):04d}-{int(mo):02d}-{int(da):02d}"
+        except Exception:
+            meet_date = ""
     gender, age_group, distance, stroke = current_event
     return Entry(
         gender=gender,
@@ -117,6 +148,7 @@ def _parse_entry(line: str, current_event: tuple[str, str, int, str]) -> Entry |
         swimmer_name=name.strip(),
         swimmer_age=int(age_s),
         team=team,
+        meet_date=meet_date,
     )
 
 
@@ -141,12 +173,36 @@ def _iter_column_lines(pdf_path: Path) -> Iterator[str]:
                     yield line
 
 
+def _iter_fullpage_lines(pdf_path: Path) -> Iterator[str]:
+    """Yield text lines in natural order across the whole PDF (no column split).
+
+    For single-column 'ladder' reports where ages/dates land in the right half
+    of each text row.
+    """
+    with pdfplumber.open(pdf_path) as pdf:
+        for page in pdf.pages:
+            text = page.extract_text() or ""
+            for raw in text.splitlines():
+                line = raw.strip()
+                if not line:
+                    continue
+                if any(line.startswith(p) for p in SKIP_PREFIXES):
+                    continue
+                yield line
+
+
 def parse_top_times(pdf_path: str | Path) -> list[Entry]:
-    """Parse a HY-TEK Individual Top Times PDF and return all entries."""
+    """Parse a HY-TEK Individual Top Times PDF and return all entries.
+
+    First tries the 2-column layout. If that yields no entries (single-column
+    'ladder' report), falls back to full-page extraction and pulls the team
+    abbreviation from a header line like "Orange Hunt Sharks [OH]".
+    """
     pdf_path = Path(pdf_path)
+
+    # First pass: 2-column layout
     entries: list[Entry] = []
     current_event: tuple[str, str, int, str] | None = None
-
     for line in _iter_column_lines(pdf_path):
         header = _parse_event_header(line)
         if header is not None:
@@ -157,5 +213,24 @@ def parse_top_times(pdf_path: str | Path) -> list[Entry]:
         entry = _parse_entry(line, current_event)
         if entry is not None:
             entries.append(entry)
+    if entries:
+        return entries
 
+    # Fallback: single-column ladder report. Pull team from header line.
+    default_team = ""
+    current_event = None
+    for line in _iter_fullpage_lines(pdf_path):
+        if not default_team:
+            tm = TEAM_HEADER_RE.search(line)
+            if tm:
+                default_team = tm.group(1)
+        header = _parse_event_header(line)
+        if header is not None:
+            current_event = header
+            continue
+        if current_event is None:
+            continue
+        entry = _parse_entry(line, current_event, default_team=default_team)
+        if entry is not None:
+            entries.append(entry)
     return entries

@@ -24,10 +24,21 @@ wheels/
 # Project data -- user-specific PDFs, kept out of git.
 # Only the handbook and a small sample stay tracked.
 data/raw/oh_2025/
+data/raw/oh_2026/
 data/raw/vh_2025/
+data/raw/vh_2026/
 data/raw/oh_vs_*.pdf
 data/raw/historic_meet_*.pdf
 data/synthetic/*.csv
+
+# Generated lineup outputs with real swimmer names -- don't commit
+lineup_*.txt
+lineup_*.pdf
+*_Lineup_*.docx
+OH_Optimal_*.docx
+
+# Claude Code local config
+.claude/
 
 # Solver intermediate artifacts
 *.lp

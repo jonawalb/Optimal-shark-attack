@@ -188,7 +188,7 @@ def solve_problem2_individuals(
     opp_lineup: dict[str, list[float]],
     *,
     candidates_per_event: int = 10,
-    max_seconds: int = 60,
+    max_seconds: int = 15,
     verbose: bool = False,
 ) -> HeadToHeadSolution:
     """Find OUR lineup maximizing expected points vs the opp's fixed lineup.
