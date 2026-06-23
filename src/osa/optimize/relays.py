@@ -13,13 +13,14 @@ to maximize the number of relays we win at 5-0.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from itertools import product
+from itertools import combinations, product
 
 import pulp
 
 from osa.model.roster import Roster, Swimmer
 from osa.rules.events import (
-    AGE_GROUPS, EVENT_CATALOG, MEDLEY_LEG_ORDER, MIXED_AGE_RELAY_ORDER, Event,
+    AGE_GROUPS, EVENT_CATALOG, FREE_RELAY_LEG_ORDER, MEDLEY_LEG_ORDER,
+    MIXED_AGE_RELAY_ORDER, Event,
 )
 
 
@@ -127,11 +128,53 @@ def _eligible_for_mixed_age_band(s: Swimmer, relay: Event, band: str) -> float |
     return None
 
 
+def _eligible_for_8u_free_relay(s: Swimmer, relay: Event) -> float | None:
+    """Return 8U swimmer's 25 free time, or None if ineligible.
+
+    8U same-age free relay is 4x25. Only 8U swimmers (no swim-downs allowed),
+    same gender. Each leg uses the swimmer's 25 free time.
+    """
+    if s.gender != relay.gender:
+        return None
+    if s.natural_age_group != "8U":
+        return None
+    return s.best_times.get(f"{s.gender}_8U_25_FREE")
+
+
 def enumerate_lineups(
     roster: Roster, relay: Event,
     *, top_per_leg: int = 6, top_k: int = 30,
 ) -> list[RelayLineup]:
     """Enumerate the top-K fastest candidate lineups for one relay."""
+    if relay.kind == "FREE_RELAY":
+        # 8U 4x25 free: all 4 legs identical. Enumerate combinations of 4
+        # distinct swimmers from the top-N fastest 8U free-timers.
+        cands: list[tuple[float, Swimmer]] = []
+        for s in roster.swimmers:
+            t = _eligible_for_8u_free_relay(s, relay)
+            if t is not None:
+                cands.append((t, s))
+        cands.sort(key=lambda p: p[0])
+        # Pool size for combinations: cap at top_per_leg+3 to keep C(n,4) tractable
+        # while still allowing variety. For 8U with ~10 swimmers, this covers all.
+        pool = cands[: top_per_leg + 3]
+        if len(pool) < 4:
+            return []
+        candidates: list[RelayLineup] = []
+        leg_labels = list(FREE_RELAY_LEG_ORDER)
+        for combo in combinations(pool, 4):
+            # Order legs fastest-to-slowest (anchor strategy is irrelevant for
+            # total time; consistent ordering helps readability of output).
+            ordered = sorted(combo, key=lambda p: p[0])
+            total = sum(t for t, _ in ordered)
+            legs = tuple(
+                RelayLeg(label=label, swimmer=s, time_seconds=t)
+                for label, (t, s) in zip(leg_labels, ordered)
+            )
+            candidates.append(RelayLineup(relay=relay, legs=legs, total_seconds=total))
+        candidates.sort(key=lambda c: c.total_seconds)
+        return candidates[:top_k]
+
     if relay.kind == "MEDLEY_RELAY":
         leg_labels = list(MEDLEY_LEG_ORDER)
         cand_fn = _eligible_for_medley_leg
@@ -153,7 +196,7 @@ def enumerate_lineups(
         per_leg[leg] = cands[:top_per_leg]
 
     # Cartesian product, filter to distinct swimmers, take top_k by total time
-    candidates: list[RelayLineup] = []
+    candidates = []
     for combo in product(*(per_leg[l] for l in leg_labels)):
         names = tuple(s.name for _, s in combo)
         if len(set(names)) != len(combo):
@@ -175,7 +218,7 @@ def solve_relays(
     opp_relay_times: dict[str, float] | None = None,
     top_per_leg: int = 12,
     top_k: int = 60,
-    max_seconds: int = 60,
+    max_seconds: int = 15,
     verbose: bool = False,
 ) -> RelaySolution:
     """Solve all 12 relays jointly.
@@ -246,12 +289,13 @@ def solve_relays(
         if idxs:
             prob += pulp.lpSum(z[i] for i in idxs) <= 1, f"one_per_{relay.event_id}"
 
-    # Per-swimmer cap: <=1 age-group relay
+    # Per-swimmer cap: <=1 age-group relay. Both same-age MEDLEY (9-10..15-18)
+    # and same-age FREE (8U) relays count against this single slot.
     swimmer_names = {s.name for s in roster.swimmers}
     for name in swimmer_names:
         ag_idxs = [
             i for i, (r, lu, _) in enumerate(all_options)
-            if r.kind == "MEDLEY_RELAY" and name in lu.swimmer_names
+            if r.kind in ("MEDLEY_RELAY", "FREE_RELAY") and name in lu.swimmer_names
         ]
         if ag_idxs:
             prob += pulp.lpSum(z[i] for i in ag_idxs) <= 1, f"ag_cap_{name}"

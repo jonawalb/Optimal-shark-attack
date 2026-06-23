@@ -77,7 +77,7 @@ def _eligible(swimmer: Swimmer, event: Event) -> bool:
 def solve_problem1(
     roster: Roster,
     *,
-    max_seconds: int = 60,
+    max_seconds: int = 15,
     verbose: bool = False,
 ) -> LineupSolution:
     """Solve Problem 1 for the given roster. Returns the optimal lineup.

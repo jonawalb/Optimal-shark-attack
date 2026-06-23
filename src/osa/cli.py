@@ -133,6 +133,8 @@ def main(argv: list[str] | None = None) -> int:
                          help="Comma-separated names to exclude (sick/missing swimmers)")
     p_solo.add_argument("--unavailable-file",
                          help="File with one swimmer name per line to exclude")
+    p_solo.add_argument("--course", default="Y", choices=["M", "Y"],
+                         help="Course filter: Y=yards (HY-TEK, default), M=meters (NVSL VM)")
     p_solo.add_argument("--out", help="Write to file instead of stdout")
     p_solo.add_argument("--verbose", action="store_true")
 
@@ -148,6 +150,8 @@ def main(argv: list[str] | None = None) -> int:
                        help="Comma-separated US swimmer names to exclude")
     p_vs.add_argument("--unavailable-file",
                        help="File with one US swimmer name per line to exclude")
+    p_vs.add_argument("--course", default="Y", choices=["M", "Y"],
+                       help="Course filter: Y=yards (HY-TEK, default), M=meters (NVSL VM)")
     p_vs.add_argument("--out", help="Write to file instead of stdout")
     p_vs.add_argument("--verbose", action="store_true")
 
@@ -158,6 +162,7 @@ def main(argv: list[str] | None = None) -> int:
         # multi-PDF rich roster
         rich = build_rich_roster(
             roster_paths, team=args.team,
+            course=args.course,
             alias_file=args.aliases, verbose=args.verbose,
         )
         unavail = _read_unavailable_list(args.unavailable, args.unavailable_file)
@@ -174,8 +179,10 @@ def main(argv: list[str] | None = None) -> int:
         for q in opp_paths: print(f"  {q}", file=sys.stderr)
 
         us = build_rich_roster(us_paths, team=args.us_team,
+                                course=args.course,
                                 alias_file=args.aliases, verbose=True)
         opp = build_rich_roster(opp_paths, team=args.opp_team,
+                                 course=args.course,
                                  alias_file=args.aliases, verbose=True)
         unavail = _read_unavailable_list(args.unavailable, args.unavailable_file)
         if unavail:
